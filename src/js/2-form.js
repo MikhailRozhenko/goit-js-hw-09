@@ -7,18 +7,22 @@ const form = document.querySelector('.feedback-form');
 form.addEventListener('input', e => {
   const email = e.currentTarget.elements.email.value;
   const message = e.currentTarget.elements.message.value;
-  formData.email = email;
-  formData.message = message;
+  formData.email = email.trim();
+  formData.message = message.trim();
   saveToLS('feedback-form-state', formData);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
   const lsData = getFromLS('feedback-form-state');
-  try {
-    formData = lsData;
-    form.elements.email.value = lsData.email;
-    form.elements.message.value = lsData.message;
-  } catch {}
+
+  if (lsData && typeof lsData === 'object') {
+    formData = {
+      email: lsData.email || '',
+      message: lsData.message || '',
+    };
+    form.elements.email.value = formData.email;
+    form.elements.message.value = formData.message;
+  }
 });
 
 form.addEventListener('submit', e => {
@@ -41,13 +45,12 @@ function saveToLS(key, value) {
   localStorage.setItem(key, jsonData);
 }
 
-function getFromLS(key, defaultValue) {
-  const jsonData = localStorage.getItem(key);
+function getFromLS(key, defaultValue = {}) {
   try {
-    const data = JSON.parse(jsonData);
-    return data;
+    const jsonData = localStorage.getItem(key);
+    return jsonData ? JSON.parse(jsonData) : defaultValue;
   } catch {
-    return defaultValue || jsonData;
+    return defaultValue;
   }
 }
 
