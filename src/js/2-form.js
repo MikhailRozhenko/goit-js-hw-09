@@ -14,15 +14,11 @@ form.addEventListener('input', e => {
 
 document.addEventListener('DOMContentLoaded', () => {
   const lsData = getFromLS('feedback-form-state');
-
-  if (lsData && typeof lsData === 'object') {
-    formData = {
-      email: lsData.email || '',
-      message: lsData.message || '',
-    };
-    form.elements.email.value = formData.email;
-    form.elements.message.value = formData.message;
-  }
+  try {
+    formData = lsData;
+    form.elements.email.value = lsData.email;
+    form.elements.message.value = lsData.message;
+  } catch {}
 });
 
 form.addEventListener('submit', e => {
@@ -45,12 +41,13 @@ function saveToLS(key, value) {
   localStorage.setItem(key, jsonData);
 }
 
-function getFromLS(key, defaultValue = {}) {
+function getFromLS(key, defaultValue) {
+  const jsonData = localStorage.getItem(key);
   try {
-    const jsonData = localStorage.getItem(key);
-    return jsonData ? JSON.parse(jsonData) : defaultValue;
+    const data = JSON.parse(jsonData);
+    return data;
   } catch {
-    return defaultValue;
+    return defaultValue || jsonData;
   }
 }
 
